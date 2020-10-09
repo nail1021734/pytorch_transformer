@@ -1,0 +1,15 @@
+# data
+**/data*/
+**/training-parallel-nc-v13/
+**/linear_data5/
+# log
+**/log*/
+
+# env
+**/venv/
+
+# Saved model
+*.model
+*.vocab
+*.pt
+

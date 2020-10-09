@@ -1,0 +1,5 @@
+future==0.18.2
+numpy==1.19.2
+sentencepiece==0.1.91
+torch==1.6.0
+tqdm==4.50.2
