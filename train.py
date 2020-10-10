@@ -118,9 +118,9 @@ else:
     )
     
 # Load data.
-with open(args.src_data, 'r') as input_file:
+with open(args.src_data, 'r', encoding='utf8') as input_file:
     data_x = [sentence.strip() for sentence in input_file.readlines()]
-with open(args.tgt_data, 'r') as input_file:
+with open(args.tgt_data, 'r', encoding='utf8') as input_file:
     data_y = [sentence.strip() for sentence in input_file.readlines()]
 
 # Tensorboard output path.
