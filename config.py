@@ -28,7 +28,7 @@ class Config:
         yield 'tokenizer_train_data_path', self.tokenizer_train_data_path
 
     @classmethod
-    def load(experiment_number: int):
+    def load(cls, experiment_number: int):
         file_path = os.path.join('data', str(experiment_number), 'config.json')
         
         with open(file_path, 'r', encoding='utf-8') as input_file:

@@ -1,3 +1,4 @@
+import argparse
 import torch
 import os
 
@@ -112,7 +113,7 @@ if __name__ == "__main__":
         encoder_N=cfg.encoder_num,
         decoder_N=cfg.decoder_num,
         vocab_size=tokenizer.vocab_len(),
-        pad_token_id=tokenizer.pad_token_id[0],
+        pad_token_id=tokenizer.pad_id[0],
         dropout=0.1
     )
     model_path = os.path.join('data', str(args.experiment), args.model_name)

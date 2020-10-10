@@ -21,7 +21,7 @@ python train.py \
 --encoder_num 1 \
 --decoder_num 1 \
 --batch_size 32 \
---epoch 100 \
+--epoch 1000 \
 --checkpoint_step 100 \
 --tokenizer_train_data_path 'data/all_news'
 ```
