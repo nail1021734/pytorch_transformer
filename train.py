@@ -10,6 +10,7 @@ from dataset import TranslateDataset
 from model import Transformer
 from tqdm import tqdm
 from optimizer import NoamOpt
+from config import Config
 
 # Parse argumernt from standard input.
 parser = argparse.ArgumentParser()
@@ -80,8 +81,30 @@ parser.add_argument(
     default=100,
     type=int
 )
+parser.add_argument(
+    '--experiment',
+    help='experiment_num',
+    required=True,
+    type=int
+)
 
 args = parser.parse_args()
+
+config = Config(
+    experiment = args.experiment,
+    src_data = args.src_data,
+    tgt_data = args.tgt_data,
+    d_emb = args.d_emb,
+    head_num = args.head_num,
+    encoder_num = args.encoder_num,
+    decoder_num = args.decoder_num,
+    batch_size = args.batch_size,
+    epoch = args.epoch,
+    checkpoint_step = args.checkpoint_step,
+    tokenizer_train_data_path = args.tokenizer_train_data_path
+)
+config.save()
+dirpath = os.path.join('data', str(args.experiment))
 
 # Load or train tokenizer.
 tokenizer = Tokenizer()
@@ -180,10 +203,12 @@ for i in range(epoch):
         )
         total_loss += loss.item()
         if iteration % args.checkpoint_step == 0:
+            if not os.path.exists(dirpath):
+                os.mkdir(dirpath)
             torch.save(
                 model.state_dict(),
                 os.path.join(
-                    'data', f'model-{i}-epoch-{loss.item():.6f}-loss.pt')
+                    dirpath, f'model-{i}-epoch-{loss.item():.6f}-loss.pt')
             )
         # Tensorboard output
         # if iteration % 10 == 0:
@@ -192,8 +217,7 @@ for i in range(epoch):
         loss.backward()
         optimizer.step()
         optimizer.optimizer.zero_grad()
-
 torch.save(
     model.state_dict(),
-    os.path.join('data', f'model-{i}-epoch-{loss.item():.6f}-loss.pt')
+    os.path.join(dirpath, f'model-{i}-epoch-{loss.item():.6f}-loss.pt')
 )

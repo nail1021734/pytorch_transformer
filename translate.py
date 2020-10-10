@@ -1,6 +1,9 @@
 import torch
+import os
+
 from tokenizer import Tokenizer
 from model import Transformer
+from config import Config
 
 def generate(
     x: str,
@@ -11,8 +14,6 @@ def generate(
     tokenizer: Tokenizer
 ) -> str:
     model.eval()
-    # xx = '還有，對於那些'
-    # seq = torch.LongTensor([tokenizer.encode(xx, max_len=-1)]).to(device)
     seq = torch.LongTensor([tokenizer.bos_id]).to(device)
     x = torch.LongTensor([tokenizer.encode(x, max_len=-1)]).to(device)
 
@@ -61,40 +62,68 @@ def generate(
         if x.size(0) != seq.size(0):
             x = x.repeat(seq.size(0) // x.size(0), 1)
 
-        # index = torch.argmax(pred_y[:, -1], dim=-1)
-        # print(pred_y.shape)
-        # seq = torch.cat((seq, index.unsqueeze(0)), dim=-1)
-    # print(seq)
-    print(tokenizer.batch_decode(seq.tolist()))
     for i in tokenizer.batch_decode(seq.tolist()):
         print(i)
 
 
 if __name__ == "__main__":
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    device = torch.device('cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '--input',
+        help='input',
+        required=True,
+        type=str
+    )
+    parser.add_argument(
+        '--width',
+        help='beam search width',
+        default=1,
+        type=int
+    )
+    parser.add_argument(
+        '--experiment',
+        help='experiment_num',
+        required=True,
+        type=str
+    )
+    parser.add_argument(
+        '--model_name',
+        help='inference model name',
+        required=True,
+        type=str
+    )
+    parser.add_argument(
+        '--max_seq_len',
+        help='inference seq len',
+        default=10,
+        type=int
+    )
+    args = parser.parse_args()
+
+    cfg = Config.load(args.experiment)
+
     tokenizer = Tokenizer()
     tokenizer.load_model('tokenizer')
     model = Transformer(
-        d_model=512,
-        h=8,
-        encoder_N=1,
-        decoder_N=1,
+        d_model=cfg.d_emb,
+        h=cfg.head_num,
+        encoder_N=cfg.encoder_num,
+        decoder_N=cfg.decoder_num,
         vocab_size=tokenizer.vocab_len(),
-        pad_token_id=0,
+        pad_token_id=tokenizer.pad_token_id[0],
         dropout=0.1
     )
-    # model = TransformerModel(
-    #     d_emb=512,
-    #     num_linear_layers=2048,
-    #     num_rnn_layers=1,
-    #     vocab_size=tokenizer.vocab_len(),
-    #     pad_token_id=tokenizer.pad_id[0],
-    #     dropout=0.1
-    # )
-    model.load_state_dict(torch.load(
-        f='linear_data5/model-299-epoch-0.009380-loss-N=1.pt'))
+    model_path = os.path.join('data', str(args.experiment), args.model_name)
+    model.load_state_dict(torch.load(f=model_path))
     model = model.to(device)
-    x = 'Everyone seems to be a loser, even if some are more affected than others.'
-    generate(x=x, beam_width=2, device=device, max_seq_len=20,
-             model=model, tokenizer=tokenizer)
+    x = args.input
+    generate(
+        x=x,
+        beam_width=args.width,
+        device=device,
+        max_seq_len=args.max_seq_len,
+        model=model,
+        tokenizer=tokenizer
+    )
