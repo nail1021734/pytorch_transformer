@@ -232,7 +232,7 @@ class Transformer(torch.nn.Module):
         y = self.embedding_layer(y)
         y = self.PE(y)
         y = self.DecodeLayers(y, x, src_mask, tgt_mask)
-        y = self.linear(y)
+        # y = self.linear(y)
         y = y @ self.embedding_layer.weight.transpose(0, 1)
 
         return y
